@@ -267,14 +267,11 @@ h1 em {
   background: #19191f;
   border: 1px solid #2c2c34;
   border-radius: 13px;
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
   min-height: 168px;
 }
 
 .overview-main {
   padding: 25px 30px 23px;
-  border-right: 1px solid #2c2c34;
 }
 
 .progress-heading {
@@ -328,51 +325,6 @@ h1 em {
   color: #8d8d97;
   font-size: 10px;
   margin-top: 10px;
-}
-
-.overview-side {
-  padding: 22px 26px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 17px;
-}
-
-.mini-stat {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.mini-stat-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-}
-
-.mini-stat-icon.green { background: #273521; color: var(--lime); }
-.mini-stat-icon.muted { background: #292930; color: #a3a3ad; }
-
-.mini-stat div {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-}
-
-.mini-stat strong { font-size: 16px; }
-.mini-stat span:not(.mini-stat-icon) { color: #888892; font-size: 11px; }
-
-.overall-note {
-  font-size: 10px;
-  color: #858590;
-  margin-top: -4px;
-}
-
-.overall-note b {
-  color: #c4c4cc;
-  font-weight: 500;
 }
 
 
@@ -551,6 +503,105 @@ h2 span {
   color: var(--gen-color);
   font-family: 'DM Mono', monospace;
   font-weight: 500;
+}
+
+/* Selo "Completa" nos cards de geração */
+.gen-complete-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--lime);
+  color: #101014;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  padding: 4px 8px;
+  border-radius: 20px;
+  z-index: 4;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+}
+
+
+/* ============================================
+   ATALHOS RÁPIDOS (HOME)
+   ============================================ */
+.quick-section {
+  margin-bottom: 40px;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quick-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #2c2c34;
+  background: #19191f;
+  border-radius: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+
+.quick-card:hover {
+  border-color: #536b41;
+  background: #1c1c23;
+  transform: translateY(-2px);
+}
+
+.quick-card--missing:hover {
+  border-color: #4a4a55;
+}
+
+.quick-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.quick-icon.green { background: #273521; color: var(--lime); }
+.quick-icon.muted { background: #292930; color: #a3a3ad; }
+
+.quick-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.quick-info strong {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  line-height: 1.1;
+}
+
+.quick-info > span {
+  font-size: 11px;
+  color: #858590;
+}
+
+.quick-arrow {
+  color: #55555f;
+  transition: color .15s, transform .15s;
+}
+
+.quick-card:hover .quick-arrow {
+  color: var(--lime);
+  transform: translateX(3px);
 }
 
 
@@ -847,7 +898,6 @@ h2 span {
   overflow: hidden;
 }
 
-/* Brilho de fundo verde suave */
 .auth-shell::before {
   content: '';
   position: absolute;
@@ -877,7 +927,6 @@ h2 span {
     0 24px 60px rgba(0, 0, 0, 0.5);
 }
 
-/* Linha de destaque no topo do card */
 .auth-card::before {
   content: '';
   position: absolute;
@@ -1004,8 +1053,9 @@ h2 span {
   color: var(--lime);
 }
 
+
 /* ============================================
-   TELA DE CARREGAMENTO / TOAST
+   TELA DE CARREGAMENTO / TOAST / LEGACY
    ============================================ */
 .loading-screen {
   min-height: 100vh;
@@ -1125,26 +1175,17 @@ h2 span {
     transform: scale(.85);
   }
 
-  .overview { grid-template-columns: 1fr; margin: 20px 0 40px; }
-  .overview-main {
-    border-right: 0;
-    border-bottom: 1px solid #2c2c34;
-    padding: 22px 20px;
-  }
-  .overview-side {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 17px 20px;
-    gap: 13px;
-  }
-  .overall-note { grid-column: 1 / -1; }
-  .mini-stat div { flex-direction: column; gap: 0; }
+  .overview { margin: 20px 0 40px; }
+  .overview-main { padding: 22px 20px; }
 
   .generation-grid { grid-template-columns: 1fr; gap: 10px; }
   .generation-card { min-height: 190px; }
 
   h2 { font-size: 24px; }
   .section-title-row { align-items: end; }
+
+  .quick-grid { grid-template-columns: 1fr; }
+  .quick-info strong { font-size: 20px; }
 
   .collection-toolbar {
     align-items: stretch;
