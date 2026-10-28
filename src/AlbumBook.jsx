@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Book, Plus, X, Save } from 'lucide-react';
-import CardSearchModal from './CardSearchModal'; // <-- IMPORTANTE: Importando o modal de busca
+import CardSearchModal from './CardSearchModal';
 
 const CARD_RATIO = '6.3 / 8.8';
 
@@ -45,7 +45,9 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     ]);
   };
 
-  const handleSlotClick = (pageIndex, slotIndex) => {
+  const handleSlotClick = (e, pageIndex, slotIndex) => {
+    e.preventDefault();
+    console.log("Slot clicado:", pageIndex, slotIndex); // Log para debugar
     setActiveSlot({ pageIndex, slotIndex });
     setIsSearchModalOpen(true);
   };
@@ -174,7 +176,12 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
               <div className="album-page page-left">
                 <div className="album-grid" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>
                   {pages[spread[0]].map((url, slotIndex) => (
-                    <div key={slotIndex} className={`album-slot ${url ? 'has-image' : ''}`} style={{ aspectRatio: CARD_RATIO }} onClick={() => handleSlotClick(spread[0], slotIndex)}>
+                    <div 
+                      key={slotIndex} 
+                      className={`album-slot ${url ? 'has-image' : ''}`} 
+                      style={{ aspectRatio: CARD_RATIO, cursor: 'pointer' }} 
+                      onClick={(e) => handleSlotClick(e, spread[0], slotIndex)}
+                    >
                       {url ? (
                         <>
                           <img src={url} alt="Carta" className="album-card-img" />
@@ -193,7 +200,12 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
               <div className="album-page page-right">
                 <div className="album-grid" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>
                   {pages[spread[1]].map((url, slotIndex) => (
-                    <div key={slotIndex} className={`album-slot ${url ? 'has-image' : ''}`} style={{ aspectRatio: CARD_RATIO }} onClick={() => handleSlotClick(spread[1], slotIndex)}>
+                    <div 
+                      key={slotIndex} 
+                      className={`album-slot ${url ? 'has-image' : ''}`} 
+                      style={{ aspectRatio: CARD_RATIO, cursor: 'pointer' }} 
+                      onClick={(e) => handleSlotClick(e, spread[1], slotIndex)}
+                    >
                       {url ? (
                         <>
                           <img src={url} alt="Carta" className="album-card-img" />
@@ -217,7 +229,7 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         </button>
       </div>
 
-      {/* AQUI ESTÁ O MODAL DE BUSCA (Faltava isso no seu código) */}
+      {/* O MODAL AQUI */}
       <CardSearchModal 
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
