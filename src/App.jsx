@@ -29,7 +29,6 @@ const GENERATIONS = [
 
 const TOTAL = 1025;
 const LEGACY_STORAGE_KEY = 'pokedex-fichario-owned-v1';
-const DOMAIN = 'meufichario.local';
 
 const NATIONAL = {
   id: 0,
@@ -208,7 +207,10 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
   const [owned, setOwned] = useState(new Set());
-  const [albumData, setAlbumData] = useState({ gridSize: null, pages: [] }); // NOVO ESTADO DO ÁLBUM
+  
+  // MUDANÇA AQUI: Agora salvamos uma lista de álbuns
+  const [albums, setAlbums] = useState([]); 
+  
   const [selectedGen, setSelectedGen] = useState(null);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -237,12 +239,11 @@ function App() {
     };
   }, []);
 
-  // Carrega coleção E ÁLBUM quando o usuário loga
   useEffect(() => {
     if (!user) {
       hydratedRef.current = false;
       setOwned(new Set());
-      setAlbumData({ gridSize: null, pages: [] });
+      setAlbums([]); // Limpa os álbuns ao deslogar
       setLegacyAvailable(0);
       return;
     }
@@ -253,22 +254,22 @@ function App() {
 
     supabase
       .from('collections')
-      .select('owned, album') // Busca as duas colunas
+      .select('owned, albums') // Busca a nova coluna albums
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) {
-          console.error('Erro ao carregar coleção:', error);
+          console.error('Erro ao carregar:', error);
         }
         const list = Array.isArray(data?.owned) ? data.owned : [];
         setOwned(new Set(list));
         
-        // Seta os dados do álbum se existirem
-        if (data?.album) {
-          setAlbumData(data.album);
+        // Seta os álbuns se existirem
+        if (Array.isArray(data?.albums)) {
+          setAlbums(data.albums);
         } else {
-          setAlbumData({ gridSize: null, pages: [] });
+          setAlbums([]);
         }
 
         setDataLoading(false);
@@ -287,7 +288,6 @@ function App() {
     };
   }, [user]);
 
-  // Salva coleção E ÁLBUM quando algo muda (debounce)
   useEffect(() => {
     if (!user || !hydratedRef.current) return;
 
@@ -296,7 +296,7 @@ function App() {
         {
           user_id: user.id,
           owned: [...owned],
-          album: albumData, // Salva o álbum
+          albums: albums, // Salva a lista de álbuns
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
@@ -309,7 +309,7 @@ function App() {
     }, 600);
 
     return () => clearTimeout(timeout);
-  }, [owned, albumData, user]); // Observa mudanças no owned E no albumData
+  }, [owned, albums, user]);
 
   const allPokemon = useMemo(
     () =>
@@ -434,23 +434,11 @@ function App() {
 
         <div className="topbar-right">
           {dataLoading ? (
-            <span className="save-indicator"><span className="save-dot" />Carregando coleção...</span>
+            <span className="save-indicator"><span className="save-dot" />Carregando...</span>
           ) : (
             <span className="save-indicator"><span className="save-dot" />Salvo na sua conta</span>
           )}
-          <button
-            className="icon-button"
-            title="Os dados são salvos automaticamente na sua conta"
-            aria-label="Informações sobre salvamento"
-          >
-            <CircleHelp size={18} />
-          </button>
-          <button
-            className="icon-button"
-            onClick={handleLogout}
-            title="Sair da conta"
-            aria-label="Sair da conta"
-          >
+          <button className="icon-button" onClick={handleLogout} title="Sair" aria-label="Sair">
             <LogOut size={18} />
           </button>
         </div>
@@ -469,12 +457,12 @@ function App() {
         </div>
       )}
 
-      {/* AQUI PASSAMOS O ALBUMDATA E O SETALBUMDATA PRO COMPONENTE */}
+      {/* PASSA A LISTA DE ALBUNS E O SETALBUMS PRO COMPONENTE */}
       {isAlbumOpen ? (
         <AlbumBook 
           onClose={() => setIsAlbumOpen(false)} 
-          savedData={albumData}
-          onSave={setAlbumData}
+          albums={albums}
+          onSaveAlbums={setAlbums}
         />
       ) : (
         <>
