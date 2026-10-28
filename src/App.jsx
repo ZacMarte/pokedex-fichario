@@ -15,7 +15,7 @@ import pokemonNames from './data/en.json';
 import { supabase } from './supabase';
 import { signIn, signUp, signOut } from './auth';
 import AlbumBook from './AlbumBook';
-import LandingPage from './LandingPage'; // Importando o arquivo externo corretamente
+import LandingPage from './LandingPage';
 
 const GENERATIONS = [
   { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7] },
