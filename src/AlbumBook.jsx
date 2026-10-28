@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, Book, Plus, X, Check, Save } from 'lucide-react';
+import { ArrowLeft, Book, Plus, X, Save } from 'lucide-react';
+import CardSearchModal from './CardSearchModal'; // Importa o novo modal
 
 const CARD_RATIO = '6.3 / 8.8';
 
@@ -10,9 +11,8 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
   const [activeAlbumId, setActiveAlbumId] = useState(null);
   
   const [activeSlot, setActiveSlot] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  // Modal para nomear o álbum ao salvar
   const [isNaming, setIsNaming] = useState(false);
   const [albumName, setAlbumName] = useState('');
 
@@ -25,7 +25,7 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
       Array(totalSlots).fill(null),
       Array(totalSlots).fill(null),
     ]);
-    setActiveAlbumId(null); // Novo álbum
+    setActiveAlbumId(null);
     setView('edit');
   };
 
@@ -45,24 +45,23 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     ]);
   };
 
+  // Ao clicar no slot vazio, abre a busca
   const handleSlotClick = (pageIndex, slotIndex) => {
     setActiveSlot({ pageIndex, slotIndex });
-    setImageUrl(pages[pageIndex][slotIndex] || '');
+    setIsSearchModalOpen(true);
   };
 
-  const saveImage = () => {
+  // Recebe a URL da imagem selecionada e coloca no grid
+  const handleSelectCard = (imageUrl) => {
     if (!activeSlot) return;
     const { pageIndex, slotIndex } = activeSlot;
     
     setPages((prev) => {
       const newPages = [...prev];
       newPages[pageIndex] = [...newPages[pageIndex]];
-      newPages[pageIndex][slotIndex] = imageUrl.trim() || null;
+      newPages[pageIndex][slotIndex] = imageUrl;
       return newPages;
     });
-    
-    setActiveSlot(null);
-    setImageUrl('');
   };
 
   const removeImage = (e, pageIndex, slotIndex) => {
@@ -75,12 +74,11 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     });
   };
 
-  // Salva o álbum na lista global (chamando o App)
   const confirmSave = () => {
     if (!albumName.trim()) return;
 
     const newAlbum = {
-      id: activeAlbumId || Date.now().toString(), // Gera um ID se for novo
+      id: activeAlbumId || Date.now().toString(),
       name: albumName.trim(),
       gridSize,
       pages,
@@ -88,26 +86,22 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
 
     let updatedAlbums;
     if (activeAlbumId) {
-      // Atualiza existente
       updatedAlbums = albums.map(a => a.id === activeAlbumId ? newAlbum : a);
     } else {
-      // Adiciona novo
       updatedAlbums = [...albums, newAlbum];
     }
 
     onSaveAlbums(updatedAlbums);
     setIsNaming(false);
-    setView('list'); // Volta pra lista
+    setView('list');
   };
 
-  // Abre o modal de salvar
   const handleSaveClick = () => {
     const existing = albums.find(a => a.id === activeAlbumId);
     setAlbumName(existing ? existing.name : '');
     setIsNaming(true);
   };
 
-  // --- RENDERIZAÇÃO: LISTA DE ÁLBUNS ---
   if (view === 'list') {
     return (
       <div className="album-container">
@@ -137,7 +131,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     );
   }
 
-  // --- RENDERIZAÇÃO: ESCOLHA DE TAMANHO ---
   if (view === 'select-size') {
     return (
       <div className="album-setup">
@@ -157,7 +150,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     );
   }
 
-  // --- RENDERIZAÇÃO: EDITOR DO ÁLBUM ---
   const spreads = [];
   for (let i = 0; i < pages.length; i += 2) {
     spreads.push([i, i + 1]);
@@ -171,7 +163,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         </button>
         <h2>{albums.find(a => a.id === activeAlbumId)?.name || 'Novo Álbum'}</h2>
         
-        {/* BOTÃO DE SALVAR NOVO */}
         <button className="btn-save-album" onClick={handleSaveClick}>
           <Save size={16} /> Salvar
         </button>
@@ -180,7 +171,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
       <div className="album-spreads-wrapper">
         {spreads.map((spread, spreadIndex) => (
           <div key={spreadIndex} className="album-spread">
-            {/* ... O código das páginas esquerda e direita é o mesmo de antes ... */}
             {pages[spread[0]] && (
               <div className="album-page page-left">
                 <div className="album-grid" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>
@@ -228,21 +218,13 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         </button>
       </div>
 
-      {/* MODAL DE ADICIONAR CARTA */}
-      {activeSlot && (
-        <div className="modal-overlay" onClick={() => setActiveSlot(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Adicionar carta</h3>
-            <input type="url" placeholder="Link da imagem..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} autoFocus />
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setActiveSlot(null)}>Cancelar</button>
-              <button className="btn-save" onClick={saveImage}>Inserir</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL DE BUSCA (AQUI ELE É CHAMADO) */}
+      <CardSearchModal 
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        onSelectCard={handleSelectCard}
+      />
 
-      {/* MODAL DE SALVAR (NOMEAR) */}
       {isNaming && (
         <div className="modal-overlay" onClick={() => setIsNaming(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
