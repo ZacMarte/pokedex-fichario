@@ -29,6 +29,7 @@ const GENERATIONS = [
 
 const TOTAL = 1025;
 const LEGACY_STORAGE_KEY = 'pokedex-fichario-owned-v1';
+const DOMAIN = 'meufichario.local';
 
 const NATIONAL = {
   id: 0,
@@ -207,13 +208,12 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
   const [owned, setOwned] = useState(new Set());
+  const [albumData, setAlbumData] = useState({ gridSize: null, pages: [] }); // NOVO ESTADO DO ÁLBUM
   const [selectedGen, setSelectedGen] = useState(null);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [legacyAvailable, setLegacyAvailable] = useState(0);
   const [toast, setToast] = useState(null);
-  
-  // ESTADO NOVO DO ÁLBUM
   const [isAlbumOpen, setIsAlbumOpen] = useState(false);
 
   const hydratedRef = useRef(false);
@@ -237,10 +237,12 @@ function App() {
     };
   }, []);
 
+  // Carrega coleção E ÁLBUM quando o usuário loga
   useEffect(() => {
     if (!user) {
       hydratedRef.current = false;
       setOwned(new Set());
+      setAlbumData({ gridSize: null, pages: [] });
       setLegacyAvailable(0);
       return;
     }
@@ -251,7 +253,7 @@ function App() {
 
     supabase
       .from('collections')
-      .select('owned')
+      .select('owned, album') // Busca as duas colunas
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -261,6 +263,14 @@ function App() {
         }
         const list = Array.isArray(data?.owned) ? data.owned : [];
         setOwned(new Set(list));
+        
+        // Seta os dados do álbum se existirem
+        if (data?.album) {
+          setAlbumData(data.album);
+        } else {
+          setAlbumData({ gridSize: null, pages: [] });
+        }
+
         setDataLoading(false);
         hydratedRef.current = true;
 
@@ -277,6 +287,7 @@ function App() {
     };
   }, [user]);
 
+  // Salva coleção E ÁLBUM quando algo muda (debounce)
   useEffect(() => {
     if (!user || !hydratedRef.current) return;
 
@@ -285,19 +296,20 @@ function App() {
         {
           user_id: user.id,
           owned: [...owned],
+          album: albumData, // Salva o álbum
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
       );
       if (error) {
-        console.error('Erro ao salvar coleção:', error);
+        console.error('Erro ao salvar:', error);
         setToast('Não foi possível salvar. Verifique sua conexão.');
         setTimeout(() => setToast(null), 3500);
       }
     }, 600);
 
     return () => clearTimeout(timeout);
-  }, [owned, user]);
+  }, [owned, albumData, user]); // Observa mudanças no owned E no albumData
 
   const allPokemon = useMemo(
     () =>
@@ -336,7 +348,7 @@ function App() {
     });
 
   const setGeneration = (generation) => {
-    setIsAlbumOpen(false); // Fecha o álbum se estiver aberto
+    setIsAlbumOpen(false);
     setSelectedGen(generation);
     setFilter('all');
     setSearch('');
@@ -412,7 +424,6 @@ function App() {
           <span>FICHÁRIO DE <b>{username.toUpperCase()}</b></span>
         </button>
 
-        {/* BOTÃO DO ÁLBUM ADICIONADO AQUI */}
         <button
           className={`album-nav-btn ${isAlbumOpen ? 'active' : ''}`}
           onClick={() => setIsAlbumOpen(true)}
@@ -458,9 +469,13 @@ function App() {
         </div>
       )}
 
-      {/* LÓGICA DE RENDERIZAÇÃO: ÁLBUM OU POKÉDEX */}
+      {/* AQUI PASSAMOS O ALBUMDATA E O SETALBUMDATA PRO COMPONENTE */}
       {isAlbumOpen ? (
-        <AlbumBook onClose={() => setIsAlbumOpen(false)} />
+        <AlbumBook 
+          onClose={() => setIsAlbumOpen(false)} 
+          savedData={albumData}
+          onSave={setAlbumData}
+        />
       ) : (
         <>
           <section className="hero">

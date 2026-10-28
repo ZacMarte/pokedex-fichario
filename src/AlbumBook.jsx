@@ -1,20 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Book, Plus, X } from 'lucide-react';
 
 const CARD_RATIO = '6.3 / 8.8';
 
-export default function AlbumBook({ onClose }) {
-  const [gridSize, setGridSize] = useState(null);
-  const [pages, setPages] = useState([]);
+// Recebe savedData (o que vem do banco) e onSave (a função pra atualizar no App)
+export default function AlbumBook({ onClose, savedData, onSave }) {
+  // Inicializa o estado com os dados que vieram do banco
+  const [gridSize, setGridSize] = useState(savedData?.gridSize || null);
+  const [pages, setPages] = useState(savedData?.pages || []);
   const [activeSlot, setActiveSlot] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
+
+  // Sempre que gridSize ou pages mudarem, avisa o App pra salvar no banco
+  useEffect(() => {
+    onSave({ gridSize, pages });
+  }, [gridSize, pages, onSave]);
 
   const startAlbum = (size) => {
     setGridSize(size);
     const totalSlots = size * size;
     setPages([
-      Array(totalSlots).fill(null), // Página 1 (Esquerda)
-      Array(totalSlots).fill(null), // Página 2 (Direita)
+      Array(totalSlots).fill(null),
+      Array(totalSlots).fill(null),
     ]);
   };
 
@@ -57,12 +64,26 @@ export default function AlbumBook({ onClose }) {
     });
   };
 
-  if (!gridSize) {
+  const resetAlbum = () => {
+    if (window.confirm("Tem certeza que quer apagar todo o álbum e começar de novo?")) {
+      setGridSize(null);
+      setPages([]);
+    }
+  };
+
+  if (!gridSize || pages.length === 0) {
     return (
       <div className="album-setup">
-        <button className="back-button" onClick={onClose}>
-          <ArrowLeft size={16} /> Voltar para o início
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <button className="back-button" onClick={onClose}>
+            <ArrowLeft size={16} /> Voltar para o início
+          </button>
+          {savedData?.gridSize && (
+            <button className="back-button" style={{ color: '#ff5a5a' }} onClick={resetAlbum}>
+              Apagar Álbum Atual
+            </button>
+          )}
+        </div>
         <div className="album-setup-content">
           <Book size={48} className="album-setup-icon" />
           <h2>Novo Álbum</h2>
@@ -76,7 +97,6 @@ export default function AlbumBook({ onClose }) {
     );
   }
 
-  // Agrupa as páginas em pares (Spread): [ [0, 1], [2, 3], [4, 5] ... ]
   const spreads = [];
   for (let i = 0; i < pages.length; i += 2) {
     spreads.push([i, i + 1]);
@@ -89,13 +109,12 @@ export default function AlbumBook({ onClose }) {
           <ArrowLeft size={16} /> Voltar
         </button>
         <h2>Seu Fichário ({gridSize}x{gridSize})</h2>
-        <div style={{ width: '80px' }} /> {/* Espaçador pro título ficar no meio */}
+        <div style={{ width: '80px' }} />
       </div>
 
       <div className="album-spreads-wrapper">
         {spreads.map((spread, spreadIndex) => (
           <div key={spreadIndex} className="album-spread">
-            {/* Página Esquerda */}
             {pages[spread[0]] && (
               <div className="album-page page-left">
                 <div 
@@ -125,7 +144,6 @@ export default function AlbumBook({ onClose }) {
               </div>
             )}
 
-            {/* Página Direita */}
             {pages[spread[1]] && (
               <div className="album-page page-right">
                 <div 
