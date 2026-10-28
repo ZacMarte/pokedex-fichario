@@ -9,13 +9,12 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
-  Sun,
-  Moon,
 } from 'lucide-react';
 import pokemonNames from './data/en.json';
 import { supabase } from './supabase';
 import { signIn, signUp, signOut } from './auth';
 import AlbumBook from './AlbumBook';
+import LandingPage from './LandingPage'; // Novo import
 
 const GENERATIONS = [
   { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7] },
@@ -61,7 +60,7 @@ function readLegacyOwned() {
   }
 }
 
-function ProgressBar({ value, color = 'var(--lime)' }) {
+function ProgressBar({ value, color = '#a9e86e' }) {
   return (
     <div className="progress-track">
       <div
@@ -106,8 +105,9 @@ function PokemonCard({ pokemon, owned, onToggle }) {
   );
 }
 
-function AuthScreen({ onAuth }) {
-  const [mode, setMode] = useState('login');
+// AuthScreen agora aceita o initialMode
+function AuthScreen({ onAuth, initialMode = 'login' }) {
+  const [mode, setMode] = useState(initialMode);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -209,7 +209,10 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
   const [owned, setOwned] = useState(new Set());
-  const [albums, setAlbums] = useState([]);
+  
+  // MUDANÇA AQUI: Agora salvamos uma lista de álbuns
+  const [albums, setAlbums] = useState([]); 
+  
   const [selectedGen, setSelectedGen] = useState(null);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -217,23 +220,10 @@ function App() {
   const [toast, setToast] = useState(null);
   const [isAlbumOpen, setIsAlbumOpen] = useState(false);
 
-  // ESTADO DO TEMA
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('pokedex-theme') || 
-      (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  });
+  // NOVO ESTADO: Controla a tela de login/landing
+  const [view, setView] = useState('landing'); // 'landing' | 'login' | 'signup'
 
   const hydratedRef = useRef(false);
-
-  // EFEITO DO TEMA
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('pokedex-theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -258,7 +248,7 @@ function App() {
     if (!user) {
       hydratedRef.current = false;
       setOwned(new Set());
-      setAlbums([]);
+      setAlbums([]); // Limpa os álbuns ao deslogar
       setLegacyAvailable(0);
       return;
     }
@@ -269,7 +259,7 @@ function App() {
 
     supabase
       .from('collections')
-      .select('owned, albums')
+      .select('owned, albums') // Busca a nova coluna albums
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -280,6 +270,7 @@ function App() {
         const list = Array.isArray(data?.owned) ? data.owned : [];
         setOwned(new Set(list));
         
+        // Seta os álbuns se existirem
         if (Array.isArray(data?.albums)) {
           setAlbums(data.albums);
         } else {
@@ -310,7 +301,7 @@ function App() {
         {
           user_id: user.id,
           owned: [...owned],
-          albums: albums,
+          albums: albums, // Salva a lista de álbuns
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
@@ -387,6 +378,7 @@ function App() {
 
   const handleLogout = async () => {
     await signOut();
+    setView('landing'); // Ao deslogar, volta pra landing page
     goHome();
   };
 
@@ -423,8 +415,12 @@ function App() {
     );
   }
 
+  // CONTROLE DE TELAS PARA QUEM NÃO ESTÁ LOGADO
   if (!user) {
-    return <AuthScreen />;
+    if (view === 'landing') {
+      return <LandingPage onLogin={() => setView('login')} onSignup={() => setView('signup')} />;
+    }
+    return <AuthScreen onAuth={() => setView('landing')} initialMode={view} />;
   }
 
   const username = getUsername(user);
@@ -452,16 +448,6 @@ function App() {
           ) : (
             <span className="save-indicator"><span className="save-dot" />Salvo na sua conta</span>
           )}
-          
-          {/* BOTÃO DE TEMA */}
-          <button
-            className="icon-button"
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
-          >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
           <button className="icon-button" onClick={handleLogout} title="Sair" aria-label="Sair">
             <LogOut size={18} />
           </button>
@@ -481,6 +467,7 @@ function App() {
         </div>
       )}
 
+      {/* PASSA A LISTA DE ALBUNS E O SETALBUMS PRO COMPONENTE */}
       {isAlbumOpen ? (
         <AlbumBook 
           onClose={() => setIsAlbumOpen(false)} 
@@ -523,7 +510,7 @@ function App() {
                   {currentProgress.toFixed(1).replace('.', ',')}<small>%</small>
                 </div>
               </div>
-              <ProgressBar value={currentProgress} color={selectedGen?.accent || 'var(--lime)'} />
+              <ProgressBar value={currentProgress} color={selectedGen?.accent || '#b6f278'} />
               <div className="progress-foot">
                 <span>{currentTotal - currentOwned} faltantes</span>
                 <span>{currentProgress >= 100 ? 'Coleção completa!' : 'Continue completando'}</span>
