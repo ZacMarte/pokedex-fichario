@@ -19,40 +19,31 @@ export default function CardSearchModal({ isOpen, onClose, onSelectCard }) {
       setLoading(true);
       
       try {
-        // CORREÇÃO: Usando a sintaxe correta do SDK (new Query().like(...))
-        // O método "like" é um alias para "contains" e busca por substring.
-        const cards = await tcgdex.card.list(
+        // 1. Busca todas as cartas com o nome (sem filtro de série ainda)
+        const allCards = await tcgdex.card.list(
           new TCGdex.Query().like('name', query)
         );
 
-        console.log('Cartas encontradas:', cards); // Ajuda a debugar
+        // 2. Filtro manual para remover as cartas do TCG Pocket
+        // O ID das cartas do Pocket geralmente começa com "A1", "A1a", "A2", etc.
+        // As cartas físicas têm IDs como "base1-4", "swsh3-136", etc.
+        const physicalCards = allCards.filter(card => {
+          // Remove se o ID começar com 'A' seguido de número (ex: A1, A2a)
+          const isPocket = /^A\d/.test(card.id);
+          return !isPocket;
+        });
 
-        const formatted = cards.map(card => ({
+        console.log('Cartas físicas encontradas:', physicalCards);
+
+        const formatted = physicalCards.map(card => ({
           id: card.id,
           name: card.name,
-          // A URL da imagem pode vir sem extensão, então adicionamos /high.png
           image: `${card.image}/high.png` 
         }));
 
         setResults(formatted);
       } catch (error) {
         console.error('Erro ao buscar cartas:', error);
-        // Se der erro, tenta uma busca mais simples (sem filtro de nome)
-        // para ver se o problema é a query ou a API.
-        try {
-          const allCards = await tcgdex.card.list();
-          const filtered = allCards.filter(c => 
-            c.name.toLowerCase().includes(query.toLowerCase())
-          );
-          const formatted = filtered.map(card => ({
-            id: card.id,
-            name: card.name,
-            image: `${card.image}/high.png`
-          }));
-          setResults(formatted);
-        } catch (e) {
-          console.error('Erro na busca alternativa:', e);
-        }
       } finally {
         setLoading(false);
       }
@@ -68,7 +59,7 @@ export default function CardSearchModal({ isOpen, onClose, onSelectCard }) {
       <div className="modal-content card-search-modal" onClick={(e) => e.stopPropagation()}>
         
         <div className="card-search-header">
-          <h3>Buscar Carta</h3>
+          <h3>Buscar Carta (TCG Físico)</h3>
           <button className="btn-close-icon" onClick={onClose}><X size={20} /></button>
         </div>
 
@@ -86,11 +77,11 @@ export default function CardSearchModal({ isOpen, onClose, onSelectCard }) {
 
         <div className="card-search-results">
           {!query && (
-            <p className="card-search-hint">Digite o nome de um Pokémon para ver as cartas.</p>
+            <p className="card-search-hint">Digite o nome de um Pokémon para ver as cartas do TCG físico.</p>
           )}
           
           {query && !loading && results.length === 0 && (
-            <p className="card-search-hint">Nenhuma carta encontrada. Tente outro nome.</p>
+            <p className="card-search-hint">Nenhuma carta física encontrada. Tente outro nome.</p>
           )}
 
           {results.length > 0 && (
