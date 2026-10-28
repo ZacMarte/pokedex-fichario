@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, Book, Plus, X, Save } from 'lucide-react';
+import CardSearchModal from './CardSearchModal'; // <-- IMPORTANTE: Importando o modal de busca
 
 const CARD_RATIO = '6.3 / 8.8';
 
@@ -104,7 +105,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     return (
       <div className="album-container">
         <div className="album-header">
-          {/* O botão da esquerda some, deixamos um espaço vazio para o título ficar centralizado */}
           <div style={{ width: '80px' }} />
           <h2>Meus Álbuns</h2>
           <div style={{ width: '80px' }} />
@@ -216,6 +216,13 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
           <Plus size={18} /> Adicionar mais páginas
         </button>
       </div>
+
+      {/* AQUI ESTÁ O MODAL DE BUSCA (Faltava isso no seu código) */}
+      <CardSearchModal 
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        onSelectCard={handleSelectCard}
+      />
 
       {isNaming && (
         <div className="modal-overlay" onClick={() => setIsNaming(false)}>
