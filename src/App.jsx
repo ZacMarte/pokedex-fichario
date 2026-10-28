@@ -9,12 +9,14 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import pokemonNames from './data/en.json';
 import { supabase } from './supabase';
 import { signIn, signUp, signOut } from './auth';
 import AlbumBook from './AlbumBook';
-import LandingPage from './LandingPage'; // Novo import
+import LandingPage from './LandingPage';
 
 const GENERATIONS = [
   { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7] },
@@ -105,7 +107,6 @@ function PokemonCard({ pokemon, owned, onToggle }) {
   );
 }
 
-// AuthScreen agora aceita o initialMode
 function AuthScreen({ onAuth, initialMode = 'login' }) {
   const [mode, setMode] = useState(initialMode);
   const [username, setUsername] = useState('');
@@ -209,10 +210,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
   const [owned, setOwned] = useState(new Set());
-  
-  // MUDANÇA AQUI: Agora salvamos uma lista de álbuns
-  const [albums, setAlbums] = useState([]); 
-  
+  const [albums, setAlbums] = useState([]);
   const [selectedGen, setSelectedGen] = useState(null);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -220,10 +218,25 @@ function App() {
   const [toast, setToast] = useState(null);
   const [isAlbumOpen, setIsAlbumOpen] = useState(false);
 
-  // NOVO ESTADO: Controla a tela de login/landing
-  const [view, setView] = useState('landing'); // 'landing' | 'login' | 'signup'
+  const [view, setView] = useState('landing'); 
+  
+  // ESTADO DO TEMA (Escuro/Claro)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('pokedex-theme') || 
+      (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  });
 
   const hydratedRef = useRef(false);
+
+  // EFEITO DO TEMA
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('pokedex-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -248,7 +261,7 @@ function App() {
     if (!user) {
       hydratedRef.current = false;
       setOwned(new Set());
-      setAlbums([]); // Limpa os álbuns ao deslogar
+      setAlbums([]); 
       setLegacyAvailable(0);
       return;
     }
@@ -259,7 +272,7 @@ function App() {
 
     supabase
       .from('collections')
-      .select('owned, albums') // Busca a nova coluna albums
+      .select('owned, albums') 
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -270,7 +283,6 @@ function App() {
         const list = Array.isArray(data?.owned) ? data.owned : [];
         setOwned(new Set(list));
         
-        // Seta os álbuns se existirem
         if (Array.isArray(data?.albums)) {
           setAlbums(data.albums);
         } else {
@@ -301,7 +313,7 @@ function App() {
         {
           user_id: user.id,
           owned: [...owned],
-          albums: albums, // Salva a lista de álbuns
+          albums: albums, 
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
@@ -378,7 +390,7 @@ function App() {
 
   const handleLogout = async () => {
     await signOut();
-    setView('landing'); // Ao deslogar, volta pra landing page
+    setView('landing'); 
     goHome();
   };
 
@@ -415,7 +427,6 @@ function App() {
     );
   }
 
-  // CONTROLE DE TELAS PARA QUEM NÃO ESTÁ LOGADO
   if (!user) {
     if (view === 'landing') {
       return <LandingPage onLogin={() => setView('login')} onSignup={() => setView('signup')} />;
@@ -448,6 +459,16 @@ function App() {
           ) : (
             <span className="save-indicator"><span className="save-dot" />Salvo na sua conta</span>
           )}
+          
+          {/* BOTÃO DE TEMA AQUI */}
+          <button
+            className="icon-button"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
           <button className="icon-button" onClick={handleLogout} title="Sair" aria-label="Sair">
             <LogOut size={18} />
           </button>
@@ -467,7 +488,6 @@ function App() {
         </div>
       )}
 
-      {/* PASSA A LISTA DE ALBUNS E O SETALBUMS PRO COMPONENTE */}
       {isAlbumOpen ? (
         <AlbumBook 
           onClose={() => setIsAlbumOpen(false)} 
