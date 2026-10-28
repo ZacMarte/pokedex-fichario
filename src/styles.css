@@ -798,3 +798,38 @@ h2 span { color: var(--text-muted); font-weight: 500; }
     padding: 20px 24px;
   }
 }
+
+/* Botão de Apagar no Header */
+.btn-delete-album {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 90, 90, 0.1);
+  color: #ff5a5a;
+  border: 1px solid rgba(255, 90, 90, 0.3);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-delete-album:hover {
+  background: rgba(255, 90, 90, 0.2);
+  border-color: #ff5a5a;
+}
+
+/* Botão de confirmar exclusão no modal */
+.btn-delete-confirm {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #ff5a5a;
+  color: #fff;
+  transition: opacity .15s;
+}
+
+.btn-delete-confirm:hover {
+  opacity: 0.8;
+}

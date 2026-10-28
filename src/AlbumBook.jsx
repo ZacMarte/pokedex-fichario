@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Book, Plus, X, Save } from 'lucide-react';
+import { ArrowLeft, Book, Plus, X, Save, Trash2 } from 'lucide-react';
 import CardSearchModal from './CardSearchModal';
 
 const CARD_RATIO = '6.3 / 8.8';
@@ -15,6 +15,9 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
 
   const [isNaming, setIsNaming] = useState(false);
   const [albumName, setAlbumName] = useState('');
+
+  // Estado para o modal de confirmação de exclusão
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleCreateNew = () => setView('select-size');
 
@@ -47,7 +50,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
 
   const handleSlotClick = (e, pageIndex, slotIndex) => {
     e.preventDefault();
-    console.log("Slot clicado:", pageIndex, slotIndex); // Log para debugar
     setActiveSlot({ pageIndex, slotIndex });
     setIsSearchModalOpen(true);
   };
@@ -100,6 +102,23 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     const existing = albums.find(a => a.id === activeAlbumId);
     setAlbumName(existing ? existing.name : '');
     setIsNaming(true);
+  };
+
+  // Função para apagar o álbum
+  const handleDeleteClick = () => {
+    if (!activeAlbumId) {
+      // Se for um álbum novo que ainda não foi salvo, só volta pra lista
+      setView('list');
+      return;
+    }
+    setIsDeleting(true);
+  };
+
+  const confirmDelete = () => {
+    const updatedAlbums = albums.filter(a => a.id !== activeAlbumId);
+    onSaveAlbums(updatedAlbums);
+    setIsDeleting(false);
+    setView('list');
   };
 
   // --- TELA 1: LISTA DE ÁLBUNS ---
@@ -164,9 +183,15 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         </button>
         <h2>{albums.find(a => a.id === activeAlbumId)?.name || 'Novo Álbum'}</h2>
         
-        <button className="btn-save-album" onClick={handleSaveClick}>
-          <Save size={16} /> Salvar
-        </button>
+        {/* Botões de Salvar e Apagar */}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-delete-album" onClick={handleDeleteClick} title="Apagar Álbum">
+            <Trash2 size={16} />
+          </button>
+          <button className="btn-save-album" onClick={handleSaveClick}>
+            <Save size={16} /> Salvar
+          </button>
+        </div>
       </div>
 
       <div className="album-spreads-wrapper">
@@ -229,13 +254,13 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         </button>
       </div>
 
-      {/* O MODAL AQUI */}
       <CardSearchModal 
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         onSelectCard={handleSelectCard}
       />
 
+      {/* Modal para Nomear */}
       {isNaming && (
         <div className="modal-overlay" onClick={() => setIsNaming(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -245,6 +270,20 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setIsNaming(false)}>Cancelar</button>
               <button className="btn-save" onClick={confirmSave} disabled={!albumName.trim()}>Salvar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Apagar */}
+      {isDeleting && (
+        <div className="modal-overlay" onClick={() => setIsDeleting(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ color: '#ff5a5a' }}>Apagar Álbum</h3>
+            <p>Tem certeza que deseja apagar este álbum? Essa ação não pode ser desfeita.</p>
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setIsDeleting(false)}>Cancelar</button>
+              <button className="btn-delete-confirm" onClick={confirmDelete}>Apagar</button>
             </div>
           </div>
         </div>
