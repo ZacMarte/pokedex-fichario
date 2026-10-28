@@ -54,6 +54,20 @@
 
 * { box-sizing: border-box; }
 
+/* Garante que a Pokédex ocupe o espaço certo */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Garante que o Álbum fique isolado e não clone o layout */
+.album-container {
+  padding: 20px 0 60px;
+  width: 100%;
+  min-height: 60vh;
+}
+
 body {
   margin: 0;
   min-width: 320px;
