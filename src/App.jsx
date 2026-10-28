@@ -4,7 +4,6 @@ import {
   Book,
   Check,
   ChevronRight,
-  CircleHelp,
   LogOut,
   Search,
   SlidersHorizontal,
@@ -62,7 +61,7 @@ function readLegacyOwned() {
   }
 }
 
-function ProgressBar({ value, color = '#a9e86e' }) {
+function ProgressBar({ value, color = 'var(--lime)' }) {
   return (
     <div className="progress-track">
       <div
@@ -107,7 +106,7 @@ function PokemonCard({ pokemon, owned, onToggle }) {
   );
 }
 
-function AuthScreen({ onAuth, initialMode = 'login' }) {
+function AuthScreen({ onAuth, onBack, initialMode = 'login' }) {
   const [mode, setMode] = useState(initialMode);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -141,6 +140,12 @@ function AuthScreen({ onAuth, initialMode = 'login' }) {
 
   return (
     <main className="auth-shell">
+      {onBack && (
+        <button className="back-button" style={{ position: 'absolute', top: '24px', left: '24px' }} onClick={onBack}>
+          <ArrowLeft size={16} /> Voltar
+        </button>
+      )}
+      
       <form className="auth-card" onSubmit={handleSubmit}>
         <div className="auth-brand">
           <span className="brand-mark"><span /></span>
@@ -218,9 +223,10 @@ function App() {
   const [toast, setToast] = useState(null);
   const [isAlbumOpen, setIsAlbumOpen] = useState(false);
 
-  const [view, setView] = useState('landing'); 
-  
-  // ESTADO DO TEMA (Escuro/Claro)
+  // Controle de tela (landing | login | signup)
+  const [view, setView] = useState('landing');
+
+  // Controle do tema
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('pokedex-theme') || 
       (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -228,15 +234,12 @@ function App() {
 
   const hydratedRef = useRef(false);
 
-  // EFEITO DO TEMA
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('pokedex-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
     let mounted = true;
@@ -261,7 +264,7 @@ function App() {
     if (!user) {
       hydratedRef.current = false;
       setOwned(new Set());
-      setAlbums([]); 
+      setAlbums([]);
       setLegacyAvailable(0);
       return;
     }
@@ -272,22 +275,16 @@ function App() {
 
     supabase
       .from('collections')
-      .select('owned, albums') 
+      .select('owned, albums')
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data, error }) => {
         if (cancelled) return;
-        if (error) {
-          console.error('Erro ao carregar:', error);
-        }
+        if (error) console.error('Erro ao carregar:', error);
+        
         const list = Array.isArray(data?.owned) ? data.owned : [];
         setOwned(new Set(list));
-        
-        if (Array.isArray(data?.albums)) {
-          setAlbums(data.albums);
-        } else {
-          setAlbums([]);
-        }
+        setAlbums(Array.isArray(data?.albums) ? data.albums : []);
 
         setDataLoading(false);
         hydratedRef.current = true;
@@ -300,9 +297,7 @@ function App() {
         }
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user]);
 
   useEffect(() => {
@@ -313,7 +308,7 @@ function App() {
         {
           user_id: user.id,
           owned: [...owned],
-          albums: albums, 
+          albums: albums,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
@@ -329,11 +324,7 @@ function App() {
   }, [owned, albums, user]);
 
   const allPokemon = useMemo(
-    () =>
-      Array.from({ length: TOTAL }, (_, i) => {
-        const id = i + 1;
-        return { id, name: pokemonNames[i] || `Pokémon ${pad(id)}` };
-      }),
+    () => Array.from({ length: TOTAL }, (_, i) => ({ id: i + 1, name: pokemonNames[i] || `Pokémon ${pad(i + 1)}` })),
     []
   );
 
@@ -345,24 +336,18 @@ function App() {
       : allPokemon;
     const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR');
     return list.filter((p) => {
-      const matchesFilter =
-        filter === 'all' ||
-        (filter === 'owned' ? owned.has(p.id) : !owned.has(p.id));
-      const matchesSearch =
-        !normalizedSearch ||
-        p.name.toLocaleLowerCase('pt-BR').includes(normalizedSearch) ||
-        String(p.id) === normalizedSearch.replace(/^#/, '');
+      const matchesFilter = filter === 'all' || (filter === 'owned' ? owned.has(p.id) : !owned.has(p.id));
+      const matchesSearch = !normalizedSearch || p.name.toLocaleLowerCase('pt-BR').includes(normalizedSearch) || String(p.id) === normalizedSearch.replace(/^#/, '');
       return matchesFilter && matchesSearch;
     });
   }, [allPokemon, selectedGen, filter, search, owned]);
 
-  const togglePokemon = (id) =>
-    setOwned((previous) => {
-      const next = new Set(previous);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const togglePokemon = (id) => setOwned((previous) => {
+    const next = new Set(previous);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
 
   const setGeneration = (generation) => {
     setIsAlbumOpen(false);
@@ -390,7 +375,7 @@ function App() {
 
   const handleLogout = async () => {
     await signOut();
-    setView('landing'); 
+    setView('landing');
     goHome();
   };
 
@@ -411,12 +396,8 @@ function App() {
     setLegacyAvailable(0);
   };
 
-  const currentTotal = selectedGen
-    ? selectedGen.end - selectedGen.start + 1
-    : TOTAL;
-  const currentOwned = selectedGen
-    ? [...owned].filter((id) => id >= selectedGen.start && id <= selectedGen.end).length
-    : totalOwned;
+  const currentTotal = selectedGen ? selectedGen.end - selectedGen.start + 1 : TOTAL;
+  const currentOwned = selectedGen ? [...owned].filter((id) => id >= selectedGen.start && id <= selectedGen.end).length : totalOwned;
   const currentProgress = (currentOwned / currentTotal) * 100;
 
   if (authLoading) {
@@ -427,16 +408,18 @@ function App() {
     );
   }
 
+  // ROTA 1: Usuário não logado
   if (!user) {
     if (view === 'landing') {
       return <LandingPage onLogin={() => setView('login')} onSignup={() => setView('signup')} />;
     }
-    return <AuthScreen onAuth={() => setView('landing')} initialMode={view} />;
+    return <AuthScreen onAuth={() => setView('landing')} onBack={() => setView('landing')} initialMode={view} />;
   }
 
   const username = getUsername(user);
   const missingTotal = TOTAL - totalOwned;
 
+  // ROTA 2: Usuário logado
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -460,7 +443,6 @@ function App() {
             <span className="save-indicator"><span className="save-dot" />Salvo na sua conta</span>
           )}
           
-          {/* BOTÃO DE TEMA AQUI */}
           <button
             className="icon-button"
             onClick={toggleTheme}
@@ -488,6 +470,7 @@ function App() {
         </div>
       )}
 
+      {/* AQUI ESTÁ A CORREÇÃO: Se o álbum estiver aberto, renderiza SÓ o álbum. Senão, renderiza a Pokédex. */}
       {isAlbumOpen ? (
         <AlbumBook 
           onClose={() => setIsAlbumOpen(false)} 
@@ -530,7 +513,7 @@ function App() {
                   {currentProgress.toFixed(1).replace('.', ',')}<small>%</small>
                 </div>
               </div>
-              <ProgressBar value={currentProgress} color={selectedGen?.accent || '#b6f278'} />
+              <ProgressBar value={currentProgress} color={selectedGen?.accent || 'var(--lime)'} />
               <div className="progress-foot">
                 <span>{currentTotal - currentOwned} faltantes</span>
                 <span>{currentProgress >= 100 ? 'Coleção completa!' : 'Continue completando'}</span>
