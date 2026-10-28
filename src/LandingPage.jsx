@@ -32,7 +32,6 @@ export default function LandingPage({ onLogin, onSignup }) {
           </div>
         </div>
         <div className="landing-visual">
-          {/* Um mockup simples pra ilustrar, ou você pode colocar imagens reais depois */}
           <div className="mockup-card">
             <div className="mockup-header">
               <Book size={16} /> Meu Álbum

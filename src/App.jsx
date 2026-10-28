@@ -15,7 +15,7 @@ import pokemonNames from './data/en.json';
 import { supabase } from './supabase';
 import { signIn, signUp, signOut } from './auth';
 import AlbumBook from './AlbumBook';
-import LandingPage from './LandingPage';
+import LandingPage from './LandingPage'; // Importando o arquivo externo corretamente
 
 const GENERATIONS = [
   { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7] },
@@ -414,42 +414,6 @@ function App() {
   const username = getUsername(user);
   const missingTotal = TOTAL - totalOwned;
 
-  // --- INÍCIO DA CORREÇÃO ESTRUTURAL ---
-  
-  // Se o álbum estiver aberto, renderiza a tela do álbum sozinha (com o header padrão)
-  if (isAlbumOpen) {
-    return (
-      <main className="app-shell">
-        <header className="topbar">
-          <button className="brand" onClick={goHome} aria-label="Voltar à Pokédex inicial">
-            <span className="brand-mark"><span /></span>
-            <span>FICHÁRIO DE <b>{username.toUpperCase()}</b></span>
-          </button>
-          <button className="album-nav-btn active" onClick={() => setIsAlbumOpen(false)}>
-            <Book size={16} /> Fechar Álbum
-          </button>
-          <div className="topbar-right">
-            <button className="icon-button" onClick={toggleTheme}>
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button className="icon-button" onClick={handleLogout}>
-              <LogOut size={18} />
-            </button>
-          </div>
-        </header>
-
-        <AlbumBook 
-          onClose={() => setIsAlbumOpen(false)} 
-          albums={albums}
-          onSaveAlbums={setAlbums}
-        />
-
-        {toast && <div className="toast">{toast}</div>}
-      </main>
-    );
-  }
-
-  // Se o álbum NÃO estiver aberto, renderiza a Pokédex normal
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -458,8 +422,12 @@ function App() {
           <span>FICHÁRIO DE <b>{username.toUpperCase()}</b></span>
         </button>
 
-        <button className="album-nav-btn" onClick={() => setIsAlbumOpen(true)}>
-          <Book size={16} /> Álbum de Cartas
+        <button
+          className={`album-nav-btn ${isAlbumOpen ? 'active' : ''}`}
+          onClick={() => setIsAlbumOpen(!isAlbumOpen)}
+        >
+          <Book size={16} />
+          {isAlbumOpen ? 'Fechar Álbum' : 'Álbum de Cartas'}
         </button>
 
         <div className="topbar-right">
@@ -469,11 +437,15 @@ function App() {
             <span className="save-indicator"><span className="save-dot" />Salvo na sua conta</span>
           )}
           
-          <button className="icon-button" onClick={toggleTheme}>
+          <button
+            className="icon-button"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+          >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <button className="icon-button" onClick={handleLogout}>
+          <button className="icon-button" onClick={handleLogout} title="Sair" aria-label="Sair">
             <LogOut size={18} />
           </button>
         </div>
@@ -493,221 +465,231 @@ function App() {
       )}
 
       <div className="main-content">
-        <section className="hero">
-          <div className="hero-copy">
-            <div className="eyebrow"><Sparkles size={14} /> SUA COLEÇÃO, SUA JORNADA</div>
-            <h1>
-              {selectedGen ? (
-                <>Pokédex <em>{selectedGen.name === 'Nacional' ? 'Nacional' : `de ${selectedGen.name}`}</em></>
-              ) : (
-                <>Complete sua <em>Pokédex.</em></>
-              )}
-            </h1>
-            <p>
-              {selectedGen
-                ? 'Um Pokémon por vez. Marque as cartas que já fazem parte da sua coleção.'
-                : 'Seu fichário digital para acompanhar cada Pokémon que você já encontrou em forma de carta.'}
-            </p>
-          </div>
-          <div className="hero-orb" aria-hidden="true">
-            <div className="orb-inner"><div className="orb-center" /></div>
-          </div>
-        </section>
-
-        <section className="overview">
-          <div className="overview-main">
-            <div className="section-kicker">
-              {selectedGen ? `GERAÇÃO ${selectedGen.id}` : 'PROGRESSO NACIONAL'}
-            </div>
-            <div className="progress-heading">
-              <div className="big-count">
-                {currentOwned}<span>/{currentTotal}</span>
-              </div>
-              <div className="progress-percent">
-                {currentProgress.toFixed(1).replace('.', ',')}<small>%</small>
-              </div>
-            </div>
-            <ProgressBar value={currentProgress} color={selectedGen?.accent || 'var(--lime)'} />
-            <div className="progress-foot">
-              <span>{currentTotal - currentOwned} faltantes</span>
-              <span>{currentProgress >= 100 ? 'Coleção completa!' : 'Continue completando'}</span>
-            </div>
-          </div>
-        </section>
-
-        {!selectedGen ? (
-          <>
-            <section className="quick-section">
-              <div className="section-title-row">
-                <div>
-                  <div className="section-kicker">ACESSO RÁPIDO</div>
-                  <h2>Ver por <span>status</span></h2>
-                </div>
-                <span className="subtle-count">Todas as gerações</span>
-              </div>
-              <div className="quick-grid">
-                <button className="quick-card quick-card--missing" onClick={() => openNational('missing')}>
-                  <span className="quick-icon muted"><SlidersHorizontal size={18} /></span>
-                  <div className="quick-info">
-                    <strong>{missingTotal}</strong>
-                    <span>Faltantes</span>
-                  </div>
-                  <span className="quick-arrow"><ChevronRight size={16} /></span>
-                </button>
-                <button className="quick-card quick-card--owned" onClick={() => openNational('owned')}>
-                  <span className="quick-icon green"><Check size={18} /></span>
-                  <div className="quick-info">
-                    <strong>{totalOwned}</strong>
-                    <span>Capturados</span>
-                  </div>
-                  <span className="quick-arrow"><ChevronRight size={16} /></span>
-                </button>
-              </div>
-            </section>
-
-            <section className="generation-section">
-              <div className="section-title-row">
-                <div>
-                  <div className="section-kicker">ESCOLHA SUA REGIÃO</div>
-                  <h2>Gerações <span>Pokémon</span></h2>
-                </div>
-                <span className="subtle-count">9 regiões</span>
-              </div>
-              <div className="generation-grid">
-                {GENERATIONS.map((gen) => {
-                  const count = [...owned].filter((id) => id >= gen.start && id <= gen.end).length;
-                  const total = gen.end - gen.start + 1;
-                  const progress = (count / total) * 100;
-                  const isComplete = count === total;
-                  return (
-                    <button
-                      className="generation-card"
-                      key={gen.id}
-                      onClick={() => setGeneration(gen)}
-                      style={{ '--gen-color': gen.accent, '--gen-gradient': gen.color }}
-                    >
-                      <span className="gen-deco" aria-hidden="true" />
-                      {isComplete && (
-                        <span className="gen-complete-badge">
-                          <Check size={11} strokeWidth={3} /> Completa
-                        </span>
-                      )}
-                      <div className="generation-top">
-                        <span className="generation-number">GEN {String(gen.id).padStart(2, '0')}</span>
-                        <ChevronRight size={17} />
-                      </div>
-                      <div className="generation-name">{gen.name}</div>
-                      <div className="generation-meta">{total} Pokémon</div>
-                      <div className="starter-row">
-                        {gen.starters.map((id) => (
-                          <img key={id} src={sprite(id)} alt="" loading="lazy" />
-                        ))}
-                      </div>
-                      <ProgressBar value={progress} color={gen.accent} />
-                      <div className="generation-bottom">
-                        <span>{count}/{total} capturados</span>
-                        <b>{progress.toFixed(0)}%</b>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          </>
+        {isAlbumOpen ? (
+          <AlbumBook 
+            onClose={() => setIsAlbumOpen(false)} 
+            albums={albums}
+            onSaveAlbums={setAlbums}
+          />
         ) : (
-          <section className="collection-section">
-            <button className="back-button" onClick={goHome}>
-              <ArrowLeft size={16} /> Voltar ao início
-            </button>
-            <div className="section-title-row collection-heading">
-              <div>
+          <>
+            <section className="hero">
+              <div className="hero-copy">
+                <div className="eyebrow"><Sparkles size={14} /> SUA COLEÇÃO, SUA JORNADA</div>
+                <h1>
+                  {selectedGen ? (
+                    <>Pokédex <em>{selectedGen.name === 'Nacional' ? 'Nacional' : `de ${selectedGen.name}`}</em></>
+                  ) : (
+                    <>Complete sua <em>Pokédex.</em></>
+                  )}
+                </h1>
+                <p>
+                  {selectedGen
+                    ? 'Um Pokémon por vez. Marque as cartas que já fazem parte da sua coleção.'
+                    : 'Seu fichário digital para acompanhar cada Pokémon que você já encontrou em forma de carta.'}
+                </p>
+              </div>
+              <div className="hero-orb" aria-hidden="true">
+                <div className="orb-inner"><div className="orb-center" /></div>
+              </div>
+            </section>
+
+            <section className="overview">
+              <div className="overview-main">
                 <div className="section-kicker">
-                  {selectedGen.id === 0
-                    ? `FICHÁRIO · ${filter === 'missing' ? 'FALTANTES' : filter === 'owned' ? 'CAPTURADOS' : 'NACIONAL'}`
-                    : `FICHÁRIO · GERAÇÃO ${selectedGen.id}`}
+                  {selectedGen ? `GERAÇÃO ${selectedGen.id}` : 'PROGRESSO NACIONAL'}
                 </div>
-                <h2>
-                  {selectedGen.name === 'Nacional'
-                    ? filter === 'missing'
-                      ? <>Todos os <span>faltantes</span></>
-                      : filter === 'owned'
-                        ? <>Todos os <span>capturados</span></>
-                        : <>Pokédex <span>Nacional</span></>
-                    : <>{selectedGen.name} <span>Pokédex</span></>}
-                </h2>
+                <div className="progress-heading">
+                  <div className="big-count">
+                    {currentOwned}<span>/{currentTotal}</span>
+                  </div>
+                  <div className="progress-percent">
+                    {currentProgress.toFixed(1).replace('.', ',')}<small>%</small>
+                  </div>
+                </div>
+                <ProgressBar value={currentProgress} color={selectedGen?.accent || 'var(--lime)'} />
+                <div className="progress-foot">
+                  <span>{currentTotal - currentOwned} faltantes</span>
+                  <span>{currentProgress >= 100 ? 'Coleção completa!' : 'Continue completando'}</span>
+                </div>
               </div>
-              <span className="subtle-count">{currentGenPokemon.length} resultados</span>
-            </div>
-            <div className="collection-toolbar">
-              <div className="filter-tabs" role="group" aria-label="Filtrar Pokémon">
-                {[['all', 'Todos'], ['owned', 'Capturados'], ['missing', 'Faltantes']].map(([value, label]) => (
-                  <button
-                    key={value}
-                    className={filter === value ? 'active' : ''}
-                    onClick={() => setFilter(value)}
-                  >
-                    {label}
-                    <span>
-                      {value === 'all'
-                        ? currentTotal
-                        : value === 'owned'
-                          ? currentOwned
-                          : currentTotal - currentOwned}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <label className="search-box">
-                <Search size={17} />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar Pokémon..."
-                />
-                <kbd>/</kbd>
-              </label>
-            </div>
-            <div className="grid-caption">
-              <span>Nº · NOME</span>
-              <span>TOQUE EM UM POKÉMON PARA MARCAR</span>
-            </div>
-            <div className="pokemon-grid">
-              {currentGenPokemon.map((pokemon) => (
-                <PokemonCard
-                  key={pokemon.id}
-                  pokemon={pokemon}
-                  owned={owned.has(pokemon.id)}
-                  onToggle={togglePokemon}
-                />
-              ))}
-            </div>
-            {currentGenPokemon.length === 0 && (
-              <div className="empty-state">
-                {filter === 'missing' ? (
-                  <>
-                    <Check size={28} />
-                    <strong>Você não tem nenhum Pokémon faltante aqui!</strong>
-                    <span>Coleção completa nessa seleção. 🎉</span>
-                  </>
-                ) : filter === 'owned' ? (
-                  <>
-                    <Search size={25} />
-                    <strong>Nenhum Pokémon capturado ainda</strong>
-                    <span>Comece marcando os que você já tem.</span>
-                  </>
-                ) : (
-                  <>
-                    <Search size={25} />
-                    <strong>Nenhum Pokémon encontrado</strong>
-                    <span>Tente mudar o filtro ou a busca.</span>
-                  </>
+            </section>
+
+            {!selectedGen ? (
+              <>
+                <section className="quick-section">
+                  <div className="section-title-row">
+                    <div>
+                      <div className="section-kicker">ACESSO RÁPIDO</div>
+                      <h2>Ver por <span>status</span></h2>
+                    </div>
+                    <span className="subtle-count">Todas as gerações</span>
+                  </div>
+                  <div className="quick-grid">
+                    <button className="quick-card quick-card--missing" onClick={() => openNational('missing')}>
+                      <span className="quick-icon muted"><SlidersHorizontal size={18} /></span>
+                      <div className="quick-info">
+                        <strong>{missingTotal}</strong>
+                        <span>Faltantes</span>
+                      </div>
+                      <span className="quick-arrow"><ChevronRight size={16} /></span>
+                    </button>
+                    <button className="quick-card quick-card--owned" onClick={() => openNational('owned')}>
+                      <span className="quick-icon green"><Check size={18} /></span>
+                      <div className="quick-info">
+                        <strong>{totalOwned}</strong>
+                        <span>Capturados</span>
+                      </div>
+                      <span className="quick-arrow"><ChevronRight size={16} /></span>
+                    </button>
+                  </div>
+                </section>
+
+                <section className="generation-section">
+                  <div className="section-title-row">
+                    <div>
+                      <div className="section-kicker">ESCOLHA SUA REGIÃO</div>
+                      <h2>Gerações <span>Pokémon</span></h2>
+                    </div>
+                    <span className="subtle-count">9 regiões</span>
+                  </div>
+                  <div className="generation-grid">
+                    {GENERATIONS.map((gen) => {
+                      const count = [...owned].filter((id) => id >= gen.start && id <= gen.end).length;
+                      const total = gen.end - gen.start + 1;
+                      const progress = (count / total) * 100;
+                      const isComplete = count === total;
+                      return (
+                        <button
+                          className="generation-card"
+                          key={gen.id}
+                          onClick={() => setGeneration(gen)}
+                          style={{ '--gen-color': gen.accent, '--gen-gradient': gen.color }}
+                        >
+                          <span className="gen-deco" aria-hidden="true" />
+                          {isComplete && (
+                            <span className="gen-complete-badge">
+                              <Check size={11} strokeWidth={3} /> Completa
+                            </span>
+                          )}
+                          <div className="generation-top">
+                            <span className="generation-number">GEN {String(gen.id).padStart(2, '0')}</span>
+                            <ChevronRight size={17} />
+                          </div>
+                          <div className="generation-name">{gen.name}</div>
+                          <div className="generation-meta">{total} Pokémon</div>
+                          <div className="starter-row">
+                            {gen.starters.map((id) => (
+                              <img key={id} src={sprite(id)} alt="" loading="lazy" />
+                            ))}
+                          </div>
+                          <ProgressBar value={progress} color={gen.accent} />
+                          <div className="generation-bottom">
+                            <span>{count}/{total} capturados</span>
+                            <b>{progress.toFixed(0)}%</b>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              </>
+            ) : (
+              <section className="collection-section">
+                <button className="back-button" onClick={goHome}>
+                  <ArrowLeft size={16} /> Voltar ao início
+                </button>
+                <div className="section-title-row collection-heading">
+                  <div>
+                    <div className="section-kicker">
+                      {selectedGen.id === 0
+                        ? `FICHÁRIO · ${filter === 'missing' ? 'FALTANTES' : filter === 'owned' ? 'CAPTURADOS' : 'NACIONAL'}`
+                        : `FICHÁRIO · GERAÇÃO ${selectedGen.id}`}
+                    </div>
+                    <h2>
+                      {selectedGen.name === 'Nacional'
+                        ? filter === 'missing'
+                          ? <>Todos os <span>faltantes</span></>
+                          : filter === 'owned'
+                            ? <>Todos os <span>capturados</span></>
+                            : <>Pokédex <span>Nacional</span></>
+                        : <>{selectedGen.name} <span>Pokédex</span></>}
+                    </h2>
+                  </div>
+                  <span className="subtle-count">{currentGenPokemon.length} resultados</span>
+                </div>
+                <div className="collection-toolbar">
+                  <div className="filter-tabs" role="group" aria-label="Filtrar Pokémon">
+                    {[['all', 'Todos'], ['owned', 'Capturados'], ['missing', 'Faltantes']].map(([value, label]) => (
+                      <button
+                        key={value}
+                        className={filter === value ? 'active' : ''}
+                        onClick={() => setFilter(value)}
+                      >
+                        {label}
+                        <span>
+                          {value === 'all'
+                            ? currentTotal
+                            : value === 'owned'
+                              ? currentOwned
+                              : currentTotal - currentOwned}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <label className="search-box">
+                    <Search size={17} />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Buscar Pokémon..."
+                    />
+                    <kbd>/</kbd>
+                  </label>
+                </div>
+                <div className="grid-caption">
+                  <span>Nº · NOME</span>
+                  <span>TOQUE EM UM POKÉMON PARA MARCAR</span>
+                </div>
+                <div className="pokemon-grid">
+                  {currentGenPokemon.map((pokemon) => (
+                    <PokemonCard
+                      key={pokemon.id}
+                      pokemon={pokemon}
+                      owned={owned.has(pokemon.id)}
+                      onToggle={togglePokemon}
+                    />
+                  ))}
+                </div>
+                {currentGenPokemon.length === 0 && (
+                  <div className="empty-state">
+                    {filter === 'missing' ? (
+                      <>
+                        <Check size={28} />
+                        <strong>Você não tem nenhum Pokémon faltante aqui!</strong>
+                        <span>Coleção completa nessa seleção. 🎉</span>
+                      </>
+                    ) : filter === 'owned' ? (
+                      <>
+                        <Search size={25} />
+                        <strong>Nenhum Pokémon capturado ainda</strong>
+                        <span>Comece marcando os que você já tem.</span>
+                      </>
+                    ) : (
+                      <>
+                        <Search size={25} />
+                        <strong>Nenhum Pokémon encontrado</strong>
+                        <span>Tente mudar o filtro ou a busca.</span>
+                      </>
+                    )}
+                  </div>
                 )}
-              </div>
+                <div className="list-footer">
+                  Mostrando {currentGenPokemon.length} de {currentTotal} Pokémon · progresso salvo na sua conta
+                </div>
+              </section>
             )}
-            <div className="list-footer">
-              Mostrando {currentGenPokemon.length} de {currentTotal} Pokémon · progresso salvo na sua conta
-            </div>
-          </section>
+          </>
         )}
       </div>
 
