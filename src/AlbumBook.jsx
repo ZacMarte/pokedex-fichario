@@ -104,9 +104,8 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     return (
       <div className="album-container">
         <div className="album-header">
-          <button className="back-button" onClick={onClose}>
-            <ArrowLeft size={16} /> Voltar para a Pokédex
-          </button>
+          {/* O botão da esquerda some, deixamos um espaço vazio para o título ficar centralizado */}
+          <div style={{ width: '80px' }} />
           <h2>Meus Álbuns</h2>
           <div style={{ width: '80px' }} />
         </div>

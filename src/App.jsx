@@ -427,7 +427,7 @@ function App() {
           onClick={() => setIsAlbumOpen(!isAlbumOpen)}
         >
           <Book size={16} />
-          {isAlbumOpen ? 'Fechar Álbum' : 'Álbum de Cartas'}
+          {isAlbumOpen ? 'Voltar à Pokédex' : 'Álbum de Cartas'}
         </button>
 
         <div className="topbar-right">
