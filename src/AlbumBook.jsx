@@ -1,8 +1,24 @@
-import { useState } from 'react';
-import { ArrowLeft, Book, Plus, X, Save, Trash2 } from 'lucide-react';
+import { useState, useMemo } from 'react'; // <-- Importante: useMemo
+import { ArrowLeft, Book, Plus, X, Save, Trash2, Sparkles } from 'lucide-react';
 import CardSearchModal from './CardSearchModal';
 
 const CARD_RATIO = '6.3 / 8.8';
+
+const REGIONS = [
+  { name: 'Kanto', start: 1, end: 151 },
+  { name: 'Johto', start: 152, end: 251 },
+  { name: 'Hoenn', start: 252, end: 386 },
+  { name: 'Sinnoh', start: 387, end: 493 },
+  { name: 'Unova', start: 494, end: 649 },
+  { name: 'Kalos', start: 650, end: 721 },
+  { name: 'Alola', start: 722, end: 809 },
+  { name: 'Galar', start: 810, end: 905 },
+  { name: 'Paldea', start: 906, end: 1025 },
+  { name: 'Nacional (Todos)', start: 1, end: 1025 },
+];
+
+const sprite = (id) =>
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
 export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
   const [view, setView] = useState(albums.length === 0 ? 'select-size' : 'list');
@@ -15,13 +31,23 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
 
   const [isNaming, setIsNaming] = useState(false);
   const [albumName, setAlbumName] = useState('');
-
-  // Estado para o modal de confirmação de exclusão
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // --- CÁLCULO DO VALOR TOTAL DO ÁLBUM ---
+  const albumTotalValue = useMemo(() => {
+    let total = 0;
+    pages.forEach(page => {
+      if (!page) return;
+      page.forEach(slot => {
+        if (slot?.price) total += Number(slot.price);
+      });
+    });
+    return total;
+  }, [pages]);
 
   const handleCreateNew = () => setView('select-size');
 
-  const startAlbum = (size) => {
+  const startEmptyAlbum = (size) => {
     setGridSize(size);
     const totalSlots = size * size;
     setPages([
@@ -29,6 +55,30 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
       Array(totalSlots).fill(null),
     ]);
     setActiveAlbumId(null);
+    setView('edit');
+  };
+
+  const startThemedAlbum = (region, size) => {
+    setGridSize(size);
+    const totalSlots = size * size;
+    const pokemonList = [];
+    for (let i = region.start; i <= region.end; i++) {
+      pokemonList.push({ pokemonId: i, imageUrl: null, price: 0 });
+    }
+
+    const newPages = [];
+    for (let i = 0; i < pokemonList.length; i += totalSlots) {
+      const page = pokemonList.slice(i, i + totalSlots);
+      while (page.length < totalSlots) page.push(null);
+      newPages.push(page);
+    }
+    if (newPages.length % 2 !== 0) {
+      newPages.push(Array(totalSlots).fill(null));
+    }
+
+    setPages(newPages);
+    setActiveAlbumId(null);
+    setAlbumName(`Região ${region.name}`);
     setView('edit');
   };
 
@@ -54,14 +104,23 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     setIsSearchModalOpen(true);
   };
 
-  const handleSelectCard = (imageUrl) => {
+  // Recebe a imagem e o preço do modal
+  const handleSelectCard = (imageUrl, price) => {
     if (!activeSlot) return;
     const { pageIndex, slotIndex } = activeSlot;
     
     setPages((prev) => {
       const newPages = [...prev];
-      newPages[pageIndex] = [...newPages[pageIndex]];
-      newPages[pageIndex][slotIndex] = imageUrl;
+      const newPage = [...newPages[pageIndex]];
+      
+      if (newPage[slotIndex]) {
+        // Mantém o pokemonId, mas atualiza imagem e preço
+        newPage[slotIndex] = { ...newPage[slotIndex], imageUrl, price };
+      } else {
+        newPage[slotIndex] = { pokemonId: null, imageUrl, price };
+      }
+      
+      newPages[pageIndex] = newPage;
       return newPages;
     });
   };
@@ -70,8 +129,18 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     e.stopPropagation();
     setPages((prev) => {
       const newPages = [...prev];
-      newPages[pageIndex] = [...newPages[pageIndex]];
-      newPages[pageIndex][slotIndex] = null;
+      const newPage = [...newPages[pageIndex]];
+      
+      if (newPage[slotIndex]) {
+        if (newPage[slotIndex].pokemonId) {
+          // Se for temático, volta a ser silhueta (zera o preço)
+          newPage[slotIndex] = { ...newPage[slotIndex], imageUrl: null, price: 0 };
+        } else {
+          newPage[slotIndex] = null;
+        }
+      }
+      
+      newPages[pageIndex] = newPage;
       return newPages;
     });
   };
@@ -100,14 +169,12 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
 
   const handleSaveClick = () => {
     const existing = albums.find(a => a.id === activeAlbumId);
-    setAlbumName(existing ? existing.name : '');
+    setAlbumName(existing ? existing.name : albumName);
     setIsNaming(true);
   };
 
-  // Função para apagar o álbum
   const handleDeleteClick = () => {
     if (!activeAlbumId) {
-      // Se for um álbum novo que ainda não foi salvo, só volta pra lista
       setView('list');
       return;
     }
@@ -121,7 +188,7 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     setView('list');
   };
 
-  // --- TELA 1: LISTA DE ÁLBUNS ---
+  // --- RENDERIZAÇÃO ---
   if (view === 'list') {
     return (
       <div className="album-container">
@@ -149,27 +216,49 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
     );
   }
 
-  // --- TELA 2: ESCOLHA DE TAMANHO ---
   if (view === 'select-size') {
     return (
       <div className="album-setup">
         <button className="back-button" onClick={() => albums.length > 0 ? setView('list') : onClose()}>
           <ArrowLeft size={16} /> Voltar
         </button>
+        
         <div className="album-setup-content">
-          <Book size={48} className="album-setup-icon" />
-          <h2>Criar Novo Álbum</h2>
-          <p>Escolha o tamanho do fichário.</p>
-          <div className="album-size-options">
-            <button onClick={() => startAlbum(3)}>3 x 3</button>
-            <button onClick={() => startAlbum(4)}>4 x 4</button>
+          <h2>Escolha o Tamanho</h2>
+          <p>Primeiro, defina o tamanho do grid.</p>
+          <div className="album-size-options" style={{ marginBottom: '40px' }}>
+            <button onClick={() => setGridSize(3)} className={gridSize === 3 ? 'active' : ''}>3 x 3</button>
+            <button onClick={() => setGridSize(4)} className={gridSize === 4 ? 'active' : ''}>4 x 4</button>
           </div>
+
+          {gridSize && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <Sparkles size={18} color="var(--lime)" />
+                <h3>Álbuns Temáticos (Com silhuetas)</h3>
+              </div>
+              <div className="theme-albums-grid">
+                {REGIONS.map(r => (
+                  <button key={r.name} onClick={() => startThemedAlbum(r, gridSize)} className="theme-album-btn">
+                    {r.name}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginTop: '40px' }}>
+                <h3>Ou comece do zero</h3>
+                <button onClick={() => startEmptyAlbum(gridSize)} className="btn-create-empty">
+                  Criar Álbum Vazio
+                </button>
+              </div>
+            </>
+          )}
+          {!gridSize && <p style={{ color: 'var(--text-muted)' }}>Selecione um tamanho acima para continuar.</p>}
         </div>
       </div>
     );
   }
 
-  // --- TELA 3: EDITOR DO ÁLBUM ---
   const spreads = [];
   for (let i = 0; i < pages.length; i += 2) {
     spreads.push([i, i + 1]);
@@ -181,9 +270,15 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         <button className="back-button" onClick={() => setView('list')}>
           <ArrowLeft size={16} /> Voltar
         </button>
-        <h2>{albums.find(a => a.id === activeAlbumId)?.name || 'Novo Álbum'}</h2>
         
-        {/* Botões de Salvar e Apagar */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h2>{albums.find(a => a.id === activeAlbumId)?.name || albumName || 'Novo Álbum'}</h2>
+          {/* MOSTRANDO O VALOR TOTAL AQUI */}
+          <span className="album-total-value">
+            Valor estimado: <strong>US$ {albumTotalValue.toFixed(2)}</strong>
+          </span>
+        </div>
+        
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-delete-album" onClick={handleDeleteClick} title="Apagar Álbum">
             <Trash2 size={16} />
@@ -200,17 +295,22 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
             {pages[spread[0]] && (
               <div className="album-page page-left">
                 <div className="album-grid" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>
-                  {pages[spread[0]].map((url, slotIndex) => (
+                  {pages[spread[0]].map((slot, slotIndex) => (
                     <div 
                       key={slotIndex} 
-                      className={`album-slot ${url ? 'has-image' : ''}`} 
+                      className={`album-slot ${slot?.imageUrl ? 'has-image' : ''} ${slot?.pokemonId ? 'is-themed' : ''}`} 
                       style={{ aspectRatio: CARD_RATIO, cursor: 'pointer' }} 
                       onClick={(e) => handleSlotClick(e, spread[0], slotIndex)}
                     >
-                      {url ? (
+                      {slot?.imageUrl ? (
                         <>
-                          <img src={url} alt="Carta" className="album-card-img" />
+                          <img src={slot.imageUrl} alt="Carta" className="album-card-img" />
                           <button className="album-remove-btn" onClick={(e) => removeImage(e, spread[0], slotIndex)}><X size={12} /></button>
+                        </>
+                      ) : slot?.pokemonId ? (
+                        <>
+                          <img src={sprite(slot.pokemonId)} alt="Silhueta" className="pokemon-silhouette" />
+                          <span className="silhouette-number">#{String(slot.pokemonId).padStart(3, '0')}</span>
                         </>
                       ) : (
                         <div className="album-slot-add"><Plus size={24} /></div>
@@ -224,17 +324,22 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
             {pages[spread[1]] && (
               <div className="album-page page-right">
                 <div className="album-grid" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}>
-                  {pages[spread[1]].map((url, slotIndex) => (
+                  {pages[spread[1]].map((slot, slotIndex) => (
                     <div 
                       key={slotIndex} 
-                      className={`album-slot ${url ? 'has-image' : ''}`} 
+                      className={`album-slot ${slot?.imageUrl ? 'has-image' : ''} ${slot?.pokemonId ? 'is-themed' : ''}`} 
                       style={{ aspectRatio: CARD_RATIO, cursor: 'pointer' }} 
                       onClick={(e) => handleSlotClick(e, spread[1], slotIndex)}
                     >
-                      {url ? (
+                      {slot?.imageUrl ? (
                         <>
-                          <img src={url} alt="Carta" className="album-card-img" />
+                          <img src={slot.imageUrl} alt="Carta" className="album-card-img" />
                           <button className="album-remove-btn" onClick={(e) => removeImage(e, spread[1], slotIndex)}><X size={12} /></button>
+                        </>
+                      ) : slot?.pokemonId ? (
+                        <>
+                          <img src={sprite(slot.pokemonId)} alt="Silhueta" className="pokemon-silhouette" />
+                          <span className="silhouette-number">#{String(slot.pokemonId).padStart(3, '0')}</span>
                         </>
                       ) : (
                         <div className="album-slot-add"><Plus size={24} /></div>
@@ -260,7 +365,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         onSelectCard={handleSelectCard}
       />
 
-      {/* Modal para Nomear */}
       {isNaming && (
         <div className="modal-overlay" onClick={() => setIsNaming(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -275,7 +379,6 @@ export default function AlbumBook({ onClose, albums, onSaveAlbums }) {
         </div>
       )}
 
-      {/* Modal para Apagar */}
       {isDeleting && (
         <div className="modal-overlay" onClick={() => setIsDeleting(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

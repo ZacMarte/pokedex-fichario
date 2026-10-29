@@ -833,3 +833,109 @@ h2 span { color: var(--text-muted); font-weight: 500; }
 .btn-delete-confirm:hover {
   opacity: 0.8;
 }
+
+/* --- Tela de escolha de Álbum Temático --- */
+.album-size-options button.active {
+  border-color: var(--lime);
+  background: var(--card-hover);
+  color: var(--lime);
+}
+
+.theme-albums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 24px;
+}
+
+.theme-album-btn {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text-main);
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.theme-album-btn:hover {
+  border-color: var(--lime);
+  background: var(--card-hover);
+  transform: translateY(-2px);
+  color: var(--lime);
+}
+
+.btn-create-empty {
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--text-muted);
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .2s;
+  margin-top: 8px;
+}
+
+.btn-create-empty:hover {
+  border-color: var(--text-main);
+  color: var(--text-main);
+}
+
+/* --- Estilo da Silhueta no Slot --- */
+.album-slot.is-themed {
+  background: var(--panel-light); /* Um fundo ligeiramente mais claro */
+  border-color: var(--line);
+}
+
+.pokemon-silhouette {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  /* O segredo da silhueta: brilho zero e contraste 100% deixa a imagem preta */
+  filter: brightness(0) opacity(0.15); 
+  transition: filter .3s;
+}
+
+/* Quando passa o mouse, a silhueta clareia para indicar que pode clicar */
+.album-slot.is-themed:hover .pokemon-silhouette {
+  filter: brightness(0) opacity(0.3);
+}
+
+/* Número do Pokémon no canto da silhueta */
+.silhouette-number {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* No tema claro, a silhueta precisa ser preta com opacidade */
+[data-theme="light"] .pokemon-silhouette {
+  filter: brightness(0) opacity(0.2);
+}
+[data-theme="light"] .album-slot.is-themed:hover .pokemon-silhouette {
+  filter: brightness(0) opacity(0.4);
+}
+
+/* Valor Total no Header do Álbum */
+.album-total-value {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  background: var(--panel-light);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.album-total-value strong {
+  color: var(--lime);
+  font-family: 'DM Mono', monospace;
+}
