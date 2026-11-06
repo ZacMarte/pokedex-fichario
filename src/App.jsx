@@ -10,12 +10,14 @@ import {
   Sparkles,
   Sun,
   Moon,
+  Download,
 } from 'lucide-react';
 import pokemonNames from './data/en.json';
 import { supabase } from './supabase';
 import { signIn, signUp, signOut } from './auth';
 import AlbumBook from './AlbumBook';
 import LandingPage from './LandingPage';
+import { exportMissingToExcel } from './exportMissing';
 
 const GENERATIONS = [
   { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7] },
@@ -637,15 +639,29 @@ function App() {
                       </button>
                     ))}
                   </div>
-                  <label className="search-box">
-                    <Search size={17} />
-                    <input
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Buscar Pokémon..."
-                    />
-                    <kbd>/</kbd>
-                  </label>
+                  
+                  {/* BOTÃO DE EXPORTAR AQUI */}
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                    {filter === 'missing' && currentGenPokemon.length > 0 && (
+                      <button 
+                        className="btn-export-excel"
+                        onClick={() => exportMissingToExcel(currentGenPokemon)}
+                        title="Baixar planilha formatada com os Pokémons faltantes"
+                      >
+                        <Download size={16} /> Exportar Planilha
+                      </button>
+                    )}
+                    
+                    <label className="search-box">
+                      <Search size={17} />
+                      <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar Pokémon..."
+                      />
+                      <kbd>/</kbd>
+                    </label>
+                  </div>
                 </div>
                 <div className="grid-caption">
                   <span>Nº · NOME</span>

@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.117.3",
     "@tcgdex/sdk": "^2.9.0",
     "@vitejs/plugin-react": "latest",
+    "exceljs": "^4.4.0",
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
