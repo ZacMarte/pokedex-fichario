@@ -17,18 +17,19 @@ import { supabase } from './supabase';
 import { signIn, signUp, signOut } from './auth';
 import AlbumBook from './AlbumBook';
 import LandingPage from './LandingPage';
+import { GenerationBadges } from './Badges'; // <-- Importa o componente que vai dentro dos cards
 import { exportMissingToExcel } from './exportMissing';
 
 const GENERATIONS = [
-  { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7] },
-  { id: 2, name: 'Johto', start: 152, end: 251, color: 'linear-gradient(135deg, #d4a017 0%, #c0c0c0 100%)', accent: '#17a8d4', starters: [152, 155, 158] },
-  { id: 3, name: 'Hoenn', start: 252, end: 386, color: 'linear-gradient(135deg, #b22222 0%, #00027e 100%)', accent: '#2e8b57', starters: [252, 255, 258] },
-  { id: 4, name: 'Sinnoh', start: 387, end: 493, color: 'linear-gradient(135deg, #4a6fa5 0%, #e5b7d5 100%)', accent: '#714aa5', starters: [387, 390, 393] },
-  { id: 5, name: 'Unova', start: 494, end: 649, color: 'linear-gradient(135deg, #1a1a1a 0%, #e8e8e8 100%)', accent: '#8fb7ec', starters: [495, 498, 501] },
-  { id: 6, name: 'Kalos', start: 650, end: 721, color: 'linear-gradient(135deg, #e63946 0%, #1d3557 100%)', accent: '#7cee72', starters: [650, 653, 656] },
-  { id: 7, name: 'Alola', start: 722, end: 809, color: 'linear-gradient(135deg, #f4a261 0%, #2a4d8f 100%)', accent: '#757575', starters: [722, 725, 728] },
-  { id: 8, name: 'Galar', start: 810, end: 905, color: 'linear-gradient(135deg, #00b4d8 0%, #c77dff 100%)', accent: '#c2246d', starters: [810, 813, 816] },
-  { id: 9, name: 'Paldea', start: 906, end: 1025, color: 'linear-gradient(135deg, #e04f5f 0%, #6a4c93 100%)', accent: '#4fe0c8', starters: [906, 909, 912] },
+  { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7], totalBadges: 8 },
+  { id: 2, name: 'Johto', start: 152, end: 251, color: 'linear-gradient(135deg, #d4a017 0%, #c0c0c0 100%)', accent: '#17a8d4', starters: [152, 155, 158], totalBadges: 8 },
+  { id: 3, name: 'Hoenn', start: 252, end: 386, color: 'linear-gradient(135deg, #b22222 0%, #00027e 100%)', accent: '#2e8b57', starters: [252, 255, 258], totalBadges: 8 },
+  { id: 4, name: 'Sinnoh', start: 387, end: 493, color: 'linear-gradient(135deg, #4a6fa5 0%, #e5b7d5 100%)', accent: '#714aa5', starters: [387, 390, 393], totalBadges: 8 },
+  { id: 5, name: 'Unova', start: 494, end: 649, color: 'linear-gradient(135deg, #1a1a1a 0%, #e8e8e8 100%)', accent: '#8fb7ec', starters: [495, 498, 501], totalBadges: 8 },
+  { id: 6, name: 'Kalos', start: 650, end: 721, color: 'linear-gradient(135deg, #e63946 0%, #1d3557 100%)', accent: '#7cee72', starters: [650, 653, 656], totalBadges: 8 },
+  { id: 7, name: 'Alola', start: 722, end: 809, color: 'linear-gradient(135deg, #f4a261 0%, #2a4d8f 100%)', accent: '#757575', starters: [722, 725, 728], totalBadges: 10 },
+  { id: 8, name: 'Galar', start: 810, end: 905, color: 'linear-gradient(135deg, #00b4d8 0%, #c77dff 100%)', accent: '#c2246d', starters: [810, 813, 816], totalBadges: 10 },
+  { id: 9, name: 'Paldea', start: 906, end: 1025, color: 'linear-gradient(135deg, #e04f5f 0%, #6a4c93 100%)', accent: '#4fe0c8', starters: [906, 909, 912], totalBadges: 8 },
 ];
 
 const TOTAL = 1025;
@@ -42,6 +43,7 @@ const NATIONAL = {
   color: 'linear-gradient(135deg, #b6f278 0%, #6a9a3f 100%)',
   accent: '#b6f278',
   starters: [],
+  totalBadges: 0,
 };
 
 const pad = (n) => String(n).padStart(3, '0');
@@ -586,6 +588,10 @@ function App() {
                             ))}
                           </div>
                           <ProgressBar value={progress} color={gen.accent} />
+                          
+                          {/* INSÍGNIAS DENTRO DO CARD */}
+                          <GenerationBadges gen={gen} owned={owned} />
+
                           <div className="generation-bottom">
                             <span>{count}/{total} capturados</span>
                             <b>{progress.toFixed(0)}%</b>
@@ -640,7 +646,6 @@ function App() {
                     ))}
                   </div>
                   
-                  {/* BOTÃO DE EXPORTAR AQUI */}
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     {filter === 'missing' && currentGenPokemon.length > 0 && (
                       <button 
