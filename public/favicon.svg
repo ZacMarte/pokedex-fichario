@@ -1,8 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
-  <rect width="1080" height="1080" fill="#101014"/>
-  <circle cx="540" cy="540" r="506" fill="#B6F278"/>
-  <circle cx="540" cy="540" r="423" fill="#101014"/>
-  <rect x="74" y="532" width="932" height="86" fill="#B6F278"/>
-  <circle cx="540" cy="540" r="144" fill="#101014"/>
-  <circle cx="540" cy="532" r="70" fill="#B6F278"/>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 28.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Camada_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1080 1080" style="enable-background:new 0 0 1080 1080;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#B6F278;}
+	.st1{fill:#0B1400;}
+</style>
+<g>
+	<path class="st0" d="M540,34C260.5,34,34,260.5,34,540s226.5,506,506,506s506-226.5,506-506S819.5,34,540,34z M540,963
+		c-207,0-379.2-148.6-415.8-345h294.8c-14.5-22.5-22.9-49.2-22.9-78c0-2.7,0.1-5.3,0.2-8H117.1c4.3-229.9,192-415,422.9-415
+		s418.7,185.1,422.9,415H683.8c0.1,2.7,0.2,5.3,0.2,8c0,28.8-8.4,55.5-22.9,78h294.8C919.2,814.4,747,963,540,963z"/>
+	<path class="st1" d="M661.1,618h294.8C919.2,814.4,747,963,540,963S160.8,814.4,124.2,618h294.8c-14.5-22.5-22.9-49.2-22.9-78
+		c0-2.7,0.1-5.3,0.2-8H117.1c4.3-229.9,192-415,422.9-415s418.7,185.1,422.9,415H683.8c0.1,2.7,0.2,5.3,0.2,8
+		C684,568.8,675.6,595.5,661.1,618z"/>
+</g>
+<circle class="st0" cx="540" cy="532" r="70"/>
 </svg>
