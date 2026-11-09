@@ -19,6 +19,7 @@ import AlbumBook from './AlbumBook';
 import LandingPage from './LandingPage';
 import { GenerationBadges } from './Badges'; // <-- Importa o componente que vai dentro dos cards
 import { exportMissingToExcel } from './exportMissing';
+import HeroShowcase from './HeroShowcase';
 
 const GENERATIONS = [
   { id: 1, name: 'Kanto', start: 1, end: 151, color: 'linear-gradient(135deg, #ee1515 0%, #3b6fd4 100%)', accent: '#eec615', starters: [1, 4, 7], totalBadges: 8 },
@@ -493,9 +494,7 @@ function App() {
                     : 'Seu fichário digital para acompanhar cada Pokémon que você já encontrou em forma de carta.'}
                 </p>
               </div>
-              <div className="hero-orb" aria-hidden="true">
-                <div className="orb-inner"><div className="orb-center" /></div>
-              </div>
+              <HeroShowcase />
             </section>
 
             <section className="overview">
