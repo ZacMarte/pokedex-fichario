@@ -1,0 +1,56 @@
+/* ============================================
+   COLEÇÃO (LISTA DE POKÉMON)
+   ============================================ */
+.back-button { border: 0; background: transparent; color: var(--text-light); display: inline-flex; align-items: center; gap: 8px; font-size: 11px; padding: 0; margin-bottom: 23px; cursor: pointer; }
+.back-button:hover { color: var(--lime); }
+.collection-heading { margin-bottom: 24px; }
+.collection-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 17px; }
+
+.filter-tabs { display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 4px; }
+.filter-tabs button {
+  border: 0; background: transparent; color: var(--text-muted); padding: 9px 12px;
+  border-radius: 6px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+}
+.filter-tabs button span { color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; }
+.filter-tabs button.active { background: var(--card-hover); color: var(--text-main); }
+.filter-tabs button.active span { color: var(--lime); }
+
+.search-box {
+  display: flex; align-items: center; gap: 9px; height: 39px; padding: 0 11px;
+  border: 1px solid var(--line); border-radius: 8px; color: var(--text-muted); width: min(100%, 260px);
+  background: var(--input-bg);
+}
+.search-box:focus-within { border-color: var(--lime); }
+.search-box input { color: var(--input-text); border: 0; outline: 0; background: transparent; width: 100%; min-width: 0; font-size: 11px; }
+.search-box input::placeholder { color: var(--text-muted); }
+.search-box kbd { font-family: 'DM Mono', monospace; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 10px; }
+
+.grid-caption { display: flex; justify-content: space-between; padding: 0 2px 10px; font-family: 'DM Mono', monospace; color: var(--text-muted); font-size: 8px; letter-spacing: .1em; border-bottom: 1px solid var(--line); }
+
+.pokemon-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; padding-top: 12px; }
+.pokemon-card {
+  min-width: 0; border: 1px solid var(--line); background: var(--panel);
+  border-radius: 10px; padding: 10px 9px 12px; text-align: left; display: flex; flex-direction: column;
+  cursor: pointer; position: relative; transition: all .15s;
+}
+.pokemon-card:hover { border-color: var(--text-muted); transform: translateY(-2px); background: var(--card-hover); }
+.pokemon-card.is-owned { background: rgba(182, 242, 120, 0.05); border-color: var(--lime); }
+[data-theme="light"] .pokemon-card.is-owned { background: rgba(88, 160, 34, 0.1); }
+
+.card-number { font-family: 'DM Mono', monospace; color: var(--text-muted); font-size: 9px; }
+.pokemon-art-wrap {
+  width: 100%; aspect-ratio: 1 / 1; display: grid; place-items: center;
+  position: relative; margin: 4px 0 5px; background: var(--bg);
+  border-radius: 7px; overflow: hidden;
+}
+.pokemon-art { width: 88%; height: 88%; object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
+.owned-check { position: absolute; right: 5px; top: 5px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--lime); color: var(--bg); }
+.pokemon-name { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
+.pokemon-status { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 9px; margin-top: 8px; }
+.pokemon-status .status-dot { background: var(--text-muted); width: 5px; height: 5px; }
+.pokemon-status.captured { color: var(--lime); }
+.pokemon-status.captured .status-dot { background: var(--lime); }
+
+/* Botão Exportar Excel */
+.btn-export-excel { display: flex; align-items: center; gap: 8px; background: var(--panel); color: var(--lime); border: 1px solid var(--lime); padding: 10px 16px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s; white-space: nowrap; }
+.btn-export-excel:hover { background: var(--lime); color: var(--bg); }

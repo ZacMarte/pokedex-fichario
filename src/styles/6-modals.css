@@ -1,0 +1,33 @@
+/* ============================================
+   MODAIS E BOTÕES EXTRAS
+   ============================================ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.modal-content { background: var(--panel); border: 1px solid var(--line); padding: 24px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); position: relative; z-index: 10000; }
+.modal-content h3 { margin: 0 0 8px; color: var(--text-main); }
+.modal-content p { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; }
+.modal-content input { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--input-text); margin-bottom: 16px; outline: none; }
+.modal-content input:focus { border-color: var(--lime); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.btn-cancel, .btn-save { padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
+.btn-cancel { background: transparent; color: var(--text-muted); }
+.btn-cancel:hover { color: var(--text-main); }
+.btn-save { background: var(--lime); color: var(--bg); }
+.btn-delete-confirm { padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: #ff5a5a; color: #fff; transition: opacity .15s; }
+.btn-delete-confirm:hover { opacity: 0.8; }
+
+/* Modal de Busca de Cartas */
+.card-search-modal { max-width: 600px; height: 80vh; display: flex; flex-direction: column; }
+.card-search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.btn-close-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; }
+.btn-close-icon:hover { color: var(--text-main); background: var(--line); }
+.card-search-input { display: flex; align-items: center; gap: 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; padding: 0 12px; height: 48px; color: var(--text-muted); margin-bottom: 20px; }
+.card-search-input:focus-within { border-color: var(--lime); }
+.card-search-input input { flex: 1; background: transparent; border: none; color: var(--input-text); outline: none; font-size: 14px; }
+.card-search-results { flex: 1; overflow-y: auto; padding-right: 4px; }
+.card-search-hint { text-align: center; color: var(--text-muted); font-size: 13px; margin-top: 40px; }
+.card-search-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; }
+.card-result-item { background: transparent; border: 2px solid transparent; border-radius: 6px; padding: 0; cursor: pointer; transition: transform .2s, border-color .2s; overflow: hidden; }
+.card-result-item:hover { transform: scale(1.05); border-color: var(--lime); }
+.card-result-item img { width: 100%; height: auto; display: block; border-radius: 4px; }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

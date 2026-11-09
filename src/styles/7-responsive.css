@@ -1,0 +1,58 @@
+/* ============================================
+   RESPONSIVO
+   ============================================ */
+@media (max-width: 900px) {
+  .app-shell { padding: 0 28px; }
+  .hero-orb { margin-right: 2%; transform: scale(.8); }
+  .generation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pokemon-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .landing-hero { flex-direction: column; text-align: center; padding: 60px 24px; }
+  .landing-copy p { margin: 0 auto 32px; }
+  .landing-buttons { justify-content: center; }
+  .landing-features { grid-template-columns: 1fr; padding: 40px 24px 60px; }
+  .landing-header { padding: 20px 24px; }
+}
+
+@media (max-width: 768px) {
+  .album-spread { flex-direction: column; }
+  .album-spread::after { display: none; }
+  .album-page { padding: 20px; }
+  .page-left { border-right: none; border-bottom: 1px solid var(--line); box-shadow: none; }
+  .page-right { border-left: none; box-shadow: none; }
+  .album-grid { gap: 10px; }
+}
+
+@media (max-width: 580px) {
+  .app-shell { padding: 0 16px; }
+  .topbar { height: 64px; }
+  .brand { font-size: 10px; }
+  .save-indicator { display: none; }
+  .topbar-right { gap: 12px; }
+  .hero { min-height: 215px; }
+  .hero-copy { padding: 30px 0; }
+  h1 { font-size: 37px; max-width: 320px; }
+  .hero p { font-size: 12px; max-width: 310px; }
+  .hero-orb { position: absolute; right: -96px; opacity: .27; transform: scale(.85); }
+  .overview { margin: 20px 0 40px; }
+  .overview-main { padding: 22px 20px; }
+  .generation-grid { grid-template-columns: 1fr; gap: 10px; }
+  .generation-card { min-height: 190px; }
+  h2 { font-size: 24px; }
+  .section-title-row { align-items: end; }
+  .quick-grid { grid-template-columns: 1fr; }
+  .quick-info strong { font-size: 20px; }
+  .collection-toolbar { align-items: stretch; flex-direction: column; }
+  .filter-tabs { justify-content: space-between; }
+  .filter-tabs button { flex: 1; justify-content: center; padding: 9px 5px; gap: 5px; font-size: 10px; }
+  .search-box { width: 100%; }
+  .grid-caption span:last-child { display: none; }
+  .pokemon-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .pokemon-card { padding: 8px 7px 10px; }
+  .pokemon-name { font-size: 10px; }
+  .pokemon-status { font-size: 8px; }
+  .footer { flex-wrap: wrap; justify-content: space-between; padding: 18px 0; }
+  .footer > span:nth-child(2) { order: 3; width: 100%; }
+  .auth-shell { padding: 16px; }
+  .auth-card { padding: 28px 22px 24px; }
+  .auth-card h1 { font-size: 21px; }
+}

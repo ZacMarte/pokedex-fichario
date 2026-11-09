@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+/* ============================================
+   VARIÁVEIS E TEMAS (Escuro e Claro)
+   ============================================ */
+:root {
+  font-family: 'Manrope', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  
+  /* Cores Base - TEMA ESCURO (Padrão) */
+  --bg: #101014;
+  --panel: #18181e;
+  --panel-light: #202027;
+  --card-bg: #19191f;
+  --card-hover: #1c1c23;
+  --line: #2c2c34;
+  
+  --text-main: #f2f2ef;
+  --text-muted: #858590;
+  --text-light: #b6b6c0;
+  
+  --lime: #b6f278;
+  
+  --slot-bg: #1c1c23;
+  --slot-border: #4a4a55;
+  --input-bg: #101014;
+  --input-border: #303039;
+  --input-text: #f0f0ed;
+}
+
+/* Cores Base - TEMA CLARO */
+[data-theme="light"] {
+  --bg: #f4f4f7;
+  --panel: #ffffff;
+  --panel-light: #e8e8ed;
+  --card-bg: #ffffff;
+  --card-hover: #f0f0f5;
+  --line: #d1d1d8;
+  
+  --text-main: #1a1a1f;
+  --text-muted: #6b6b76;
+  --text-light: #4a4a55;
+  
+  --lime: #58a022;
+  
+  --slot-bg: #e8e8ed;
+  --slot-border: #c0c0cc;
+  --input-bg: #ffffff;
+  --input-border: #d1d1d8;
+  --input-text: #1a1a1f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg);
+  color: var(--text-main);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button, input { font: inherit; }
+button { color: inherit; }
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
