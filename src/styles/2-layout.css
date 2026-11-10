@@ -192,6 +192,7 @@ h1 em { color: var(--lime); font-style: normal; }
 }
 
 
+
 /* Configuração base das imagens */
 .showcase-img {
   position: absolute;
@@ -223,12 +224,10 @@ h1 em { color: var(--lime); font-style: normal; }
 @media (max-width: 580px) {
   .hero-showcase {
     position: absolute;
-    left: 50%;
-    opacity: 0.15; /* Deixa mais apagado pra não atrapalhar o texto */
+    right: -60px;
+    opacity: 0.3;
+    transform: scale(1.2);
     pointer-events: none;
-    width: 260px;
-    height: 260px;
-    top: 10px; /* Ajusta a altura pra ficar no meio do hero */
   }
 }
 
